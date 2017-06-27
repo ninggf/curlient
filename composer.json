@@ -1,0 +1,23 @@
+{
+  "name": "wula/curlient",
+  "description": "a helper class for curl",
+  "license": "MIT",
+  "keywords": [
+    "CURL",
+    "HTTPCLIENT"
+  ],
+  "authors": [
+    {
+      "name": "Leo Ning",
+      "email": "windywany@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.6 || >= 7.1",
+    "ext-curl": "*"
+  },
+  "require-dev": {
+	   "phpunit/phpunit": "*"
+  },
+  "homepage": "http://www.wulaphp.com/curlient"
+}
