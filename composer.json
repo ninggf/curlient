@@ -23,10 +23,8 @@
 	"phpunit/phpunit": "*"
   },
   "autoload": {
-	"psr-0": {
-	  "curlient\\": "src/",
-	  "curlient\\filter\\": "src/",
-	  "curlient\\crawler\\": "src/"
+	"psr-4": {
+	  "curlient\\": "src/curlient/"
 	}
   },
   "homepage": "http://www.wulaphp.com/curlient"
