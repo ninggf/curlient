@@ -55,4 +55,42 @@ class SpiderTest extends TestCase {
 
 		self::assertEquals('UTF-8', $results[0][1]->encoding);
 	}
+
+	public function testGoodURL() {
+		$base  = 'http://a.com/';
+		$url[] = ['url' => 'http://a.com/a.html'];
+		$url[] = ['url' => 'https://a.com/a.html'];
+		$url[] = ['url' => 'ftp://a.com/a.html'];
+		$url[] = ['url' => 'ftps://a.com/a.html'];
+		$url[] = ['url' => '//a.com/a.html'];
+		$url[] = ['url' => '/a.html'];
+		$url[] = ['url' => 'a.html'];
+		Curlient::goodURL($base, $url);
+		self::assertEquals('http://a.com/a.html', $url[0]['url']);
+		self::assertEquals('https://a.com/a.html', $url[1]['url']);
+		self::assertEquals('ftp://a.com/a.html', $url[2]['url']);
+		self::assertEquals('ftps://a.com/a.html', $url[3]['url']);
+
+		self::assertEquals('http://a.com/a.html', $url[4]['url']);
+		self::assertEquals('http://a.com/a.html', $url[5]['url']);
+		self::assertEquals('http://a.com/a.html', $url[6]['url']);
+	}
+
+	public function testGoodURL1() {
+		$base   = 'http://a.com/a/a.html';
+		$urls[] = ['url' => './b.html'];
+		$urls[] = ['url' => '../b.html'];
+		Curlient::goodURL($base, $urls);
+		self::assertEquals('http://a.com/a/./b.html', $urls[0]['url']);
+		self::assertEquals('http://a.com/a/../b.html', $urls[1]['url']);
+	}
+
+	public function testGoodURL2() {
+		$base   = 'http://a.com/a/b/';
+		$urls[] = ['url' => './b.html'];
+		$urls[] = ['url' => '../b.html'];
+		Curlient::goodURL($base, $urls);
+		self::assertEquals('http://a.com/a/./b.html', $urls[0]['url']);
+		self::assertEquals('http://a.com/a/../b.html', $urls[1]['url']);
+	}
 }

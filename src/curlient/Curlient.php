@@ -137,6 +137,10 @@ class Curlient {
 		return $this;
 	}
 
+	public function referer($referer) {
+		$this->referer = $referer;
+	}
+
 	/**
 	 * 指定IP出去.
 	 *
@@ -459,6 +463,89 @@ class Curlient {
 		$this->header['X-Requested-With'] = 'XMLHttpRequest';
 
 		return $this;
+	}
+
+	/**
+	 * 根据$base生成合法的url.
+	 *
+	 * @param string $base
+	 * @param array  $urls
+	 */
+	public static function goodURL($base, &$urls) {
+		if (!isset($urls[0]['url']) || !preg_match('#^(ht|f)tps?://.+#', $base)) {
+			return;
+		}
+
+		$info = parse_url($base);
+		$path = '/';
+		if (isset($info['path'])) {
+			$path = rtrim($info['path'], '/');
+			if ($path) {
+				$path = substr($path, 0, 1 + strrpos($path, '/'));
+			} else {
+				$path = '/';
+			}
+		}
+		// auth
+		$auth = '';
+		if (isset($info['user'])) {
+			$auth = $info['user'];
+			if (isset($info['password'])) {
+				$auth .= ':' . $$info['password'] . '@';
+			}
+		}
+		// base url
+		$base = $info['scheme'] . '://' . $auth . $info['host'] . (isset($info['port']) ? ':' . $info['port'] : '');
+		$path = $base . $path;
+		array_walk($urls, function (&$url) use ($info, $base, $path) {
+			$url['url'] = trim($url['url']);
+			if (preg_match('#^(?P<lt>(ht|f)tps?://|//|/)?.*#i', $url['url'], $ms)) {
+				if (isset($ms['lt'])) {
+					switch ($ms['lt']) {
+						case 'http://':
+						case 'https://':
+						case 'ftp://':
+						case 'ftps://':
+							break;
+						case '//':
+							$url['url'] = $info['scheme'] . ':' . $url['url'];
+							break;
+						case  '/':
+							$url['url'] = $base . $url['url'];
+							break;
+						default:
+							$url['url'] = $path . $url['url'];
+					}
+				} else {
+					$url['url'] = $path . $url['url'];
+				}
+			}
+		});
+	}
+
+	/**
+	 *
+	 * @param $gcfg
+	 *
+	 * @return \curlient\Curlient
+	 */
+	public static function build($gcfg = []) {
+		extract($gcfg);
+		$client = new Curlient(isset($timeout) ? $timeout : 30, isset($proxy) ? $proxy : '');
+		if (isset($ip)) {
+			$client->useIP($ip);
+		}
+		if (isset($cookie) && $cookie) {
+			$client->cookie($cookie);
+		}
+		if (isset($header) && $header) {
+			$client->header($header);
+		}
+		if (isset($refer)) {
+			$client->referer($refer);
+		}
+
+		return $client;
 	}
 
 	/**
