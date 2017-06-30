@@ -24,7 +24,9 @@
   },
   "autoload": {
 	"psr-0": {
-	  "curlient\\": "src/"
+	  "curlient\\": "src/",
+	  "curlient\\filter\\": "src/",
+	  "curlient\\crawler\\": "src/"
 	}
   },
   "homepage": "http://www.wulaphp.com/curlient"

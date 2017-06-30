@@ -2,7 +2,11 @@
 <phpunit bootstrap="src/curlient/Curlient.php" colors="true">
     <testsuites>
         <testsuite name="curlient">
-            <directory>tests</directory>
+            <file>tests/CurlientTest.php</file>
+        </testsuite>
+        <testsuite name="filter">
+            <directory>tests/filter</directory>
+            <file>tests/StringFilterTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
