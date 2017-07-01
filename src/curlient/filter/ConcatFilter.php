@@ -18,7 +18,7 @@ class ConcatFilter implements IFieldFilter {
 	}
 
 	public function filter($content, $args) {
-		list($regex, $concat, $ary) = $args;
+		@list($regex, $concat, $ary) = $args;
 		if ($regex) {
 			//正则解析：将简易的正则变为正则
 			//(*)==>(.*?)

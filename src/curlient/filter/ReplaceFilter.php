@@ -23,7 +23,7 @@ class ReplaceFilter implements IFieldFilter {
 	}
 
 	public function filter($content, $args) {
-		list($search, $replace, $reg) = $args;
+		@list($search, $replace, $reg) = $args;
 		if ($reg) {
 			return preg_replace($search, $replace, $content);
 		} else {

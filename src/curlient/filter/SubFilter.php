@@ -23,7 +23,7 @@ class SubFilter implements IFieldFilter {
 
 	public function filter($content, $args) {
 		if (!empty($content)) {
-			list($start, $end) = $args;
+			@list($start, $end) = $args;
 			$startPos = $start ? mb_strpos($content, $start) + mb_strlen($start) : 0;
 			$endPos   = $end ? mb_strpos($content, $end, $startPos) : null;
 			$len      = $endPos ? $endPos - $startPos : null;

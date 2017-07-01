@@ -70,7 +70,7 @@ class StringFilter {
 	public static function sub($content, ...$args) {
 		array_unshift($args, 'sub');
 
-		return self::getInstance()->getContent($content, [$args]);
+		return self::getInstance()->filter($content, [$args]);
 	}
 
 	/**
@@ -84,7 +84,7 @@ class StringFilter {
 	public static function concat($content, ...$args) {
 		array_unshift($args, 'concat');
 
-		return self::getInstance()->getContent($content, [$args]);
+		return self::getInstance()->filter($content, [$args]);
 	}
 
 	/**
@@ -93,7 +93,7 @@ class StringFilter {
 	 *
 	 * @return string
 	 */
-	public function getContent($content, array $fieldConf) {
+	public function filter($content, array $fieldConf) {
 		if ($content) {
 			foreach ($fieldConf as $conf) {
 				if ($conf) {

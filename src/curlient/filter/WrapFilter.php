@@ -14,7 +14,7 @@ use curlient\IFieldFilter;
 
 class WrapFilter implements IFieldFilter {
 	public function filter($content, $args) {
-		list($start, $end) = $args;
+		@list($start, $end) = $args;
 		if ($start) {
 			$content = $start . $content;
 		}
