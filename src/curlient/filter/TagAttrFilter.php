@@ -24,6 +24,8 @@ class TagAttrFilter implements IFieldFilter {
 			if ($attr) {
 				if ($attr == 'text') {
 					return $content->text();
+				} else if ($attr == 'html') {
+					return $content->html();
 				}
 
 				return $content->attr($attr);

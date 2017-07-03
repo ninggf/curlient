@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 class ListPageCrawlerTest extends TestCase {
 	public function testparseListPageURL() {
 		// 常规地址列表.
-		$rst = ListCrawler::parseListPageURL(['list' => ['1', '2']]);
+		$rst = ListCrawler::parseListPageURL(['entries' => ['1', '2']]);
 		self::assertContains('1', $rst);
 		self::assertContains('2', $rst);
 		//数值增减型

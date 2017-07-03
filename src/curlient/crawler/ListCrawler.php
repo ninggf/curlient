@@ -305,15 +305,15 @@ class ListCrawler {
 	public static function parseListPageURL($config) {
 		$lists = [];
 		// 一个元素即为一个url.
-		if (isset($config['list'])) {
-			$lists += $config['list'];
+		if (isset($config['entries'])) {
+			$lists += $config['entries'];
 		}
 
 		if (isset($config['expression'])) {
 			$expression = $config['expression'];
 			//正则
 			if (preg_match('#\{\{\s*0\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(0|[1-9]\d*)\s*\}\}#', $expression, $tags)) {
-				list($all, $start, $end, $step, $pad) = $tags;
+				@list($all, $start, $end, $step, $pad) = $tags;
 				$pad  = intval($pad);
 				$nums = range(intval($start), intval($end), intval($step));
 				foreach ($nums as $num) {

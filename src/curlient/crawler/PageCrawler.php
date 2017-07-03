@@ -78,8 +78,8 @@ class PageCrawler {
 				$this->getMoreContent($client, $content, $cfg, $fields, $url, $gcfg);
 			}
 		}
-
-		$rst = ['url' => $url, 'fields' => $fields];
+		$fields['抓取时间'] = time();
+		$rst            = ['url' => $url, 'fields' => $fields];
 
 		return $rst;
 	}

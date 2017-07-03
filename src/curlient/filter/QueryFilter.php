@@ -69,8 +69,17 @@ class QueryFilter implements IFieldFilter {
 				}
 			};
 			$rtn = $dom;
-			if ($attr) {
-				$rtn = $dom->count() > 0 ? ($attr == 'text' ? $dom->text() : $dom->attr($attr)) : '';
+			if ($attr && $dom->count() > 0) {
+				switch ($attr) {
+					case 'text':
+						$rtn = $dom->text();
+						break;
+					case 'html':
+						$rtn = $dom->html();
+						break;
+					default:
+						$rtn = $dom->attr($attr);
+				}
 			}
 		}
 
