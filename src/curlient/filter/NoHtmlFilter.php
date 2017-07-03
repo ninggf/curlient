@@ -18,10 +18,18 @@ class NoHtmlFilter implements IFieldFilter {
 	}
 
 	public function filter($content, $args) {
-		if ($args && $args[0]) {
-			$tags = str_replace(',', '|', $args[0]);
-			if ($tags) {
-				return preg_replace('#</?' . $tags . '[^>]*>#iums', '', $content);
+		@list($args, $type) = $args;
+		if ($args) {
+			if (empty($type)) {
+				$tags = str_replace(',', '|', $args);
+				if ($tags) {
+					return preg_replace('#</?' . $tags . '[^>]*>#iums', '', $content);
+				}
+			} else {
+				$tags = str_replace(',', '|', $args);
+				if ($tags) {
+					return preg_replace('#<(' . $tags . ')[^>]*>.*?</\1>#iums', '', $content);
+				}
 			}
 		}
 

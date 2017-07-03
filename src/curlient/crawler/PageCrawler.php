@@ -13,7 +13,10 @@ namespace curlient\crawler;
 use curlient\Curlient;
 use curlient\filter\ConcatFilter;
 use curlient\filter\JsonFilter;
+use curlient\filter\QueryFilter;
+use curlient\IFieldFilter;
 use curlient\StringFilter;
+use Symfony\Component\DomCrawler\Crawler;
 
 class PageCrawler {
 	private $ip;
@@ -31,7 +34,17 @@ class PageCrawler {
 	 * @return bool|string 验证成功返回true，否则返回错误信息.
 	 */
 	public static function validate($conf) {
-		return false;
+		if (!isset($conf['url'])) {
+			return _tr('url is missed@crawler');
+		}
+		if (!isset($conf['page'])) {
+			return _tr('page is missed@crawler');
+		}
+		if (!isset($conf['page']['fields'])) {
+			return _tr('page fields is missed@crawler');
+		}
+
+		return true;
 	}
 
 	//抓取这一页
@@ -56,6 +69,11 @@ class PageCrawler {
 			}
 
 			if ($content) {//解析内容
+				if (isset($cfg['json'])) {
+					$content = @json_decode($content);
+				} else if (isset($cfg['dom'])) {
+					$content = new Crawler($content);
+				}
 				$this->parseFields($content, $cfg, $fields);
 				$this->getMoreContent($client, $content, $cfg, $fields, $url, $gcfg);
 			}
@@ -103,6 +121,11 @@ class PageCrawler {
 			if (!$content) {
 				break;//采不到值了退出不采了
 			}
+			if (isset($cfg['json'])) {
+				$content = @json_decode($content);
+			} else if (isset($cfg['dom'])) {
+				$content = new Crawler($content);
+			}
 			$val = $grabber->filter($content, $cfg['fields'][ $concat ]);
 			if (!$val) {//采不到值了退出不采了
 				break;
@@ -139,41 +162,10 @@ class PageCrawler {
 				list($start, $end) = $pager['wrapper'];
 				$content = StringFilter::sub($content, $start, $end);
 			}
-			if (is_array($content)) {
-				$filterCfg = $pager['pages'];
-				$filter    = new JsonFilter();
-				$limit     = isset($pager['limit']) ? intval($pager['limit']) : 100;
-				if ($type == 'list') {//全部列出模式
-					$pages = [];
-					$j     = 0;
-					do {
-						$filterCfg[] = ['{$i}', $j];
-						$link        = $filter->filter($content, $filterCfg);
-						if (!$link) {
-							break;
-						}
-						$link[0]['url'] = $link;
-						Curlient::goodURL($url, $link);
-						$tu = $link[0]['url'];
-						if ($tu != $url && !in_array($tu, $pages)) {
-							$pages[] = $tu;
-						}
-						$j++;
-					} while ($j < $limit);
-
-					return $pages ? $pages[ $i++ ] : null;
-				} else {//下一页模式
-					$link = $filter->filter($content, $filterCfg);
-					if ($link) {//取到分页
-						$link[]['url'] = $link;
-						Curlient::goodURL($url, $link);
-						if ($link[0]['url'] != $url) {
-							$link = $link[0]['url'];
-						} else {
-							$link = '';
-						}
-					}
-				}
+			if (isset($cfg['json'])) {
+				$link = $this->getPages(new JsonFilter(), $pager, $content, $pages, $type, $i, $url);
+			} else if (isset($cfg['dom'])) {
+				$link = $this->getPages(new QueryFilter(), $pager, $content, $pages, $type, $i, $url);
 			} else {//从正文取分页
 				$filterCfg = $pager['pages'];
 				$filter    = new ConcatFilter();
@@ -245,5 +237,44 @@ class PageCrawler {
 		}
 
 		return $content;
+	}
+
+	private function getPages(IFieldFilter $filter, $pager, $content, &$pages, $type, &$i, $url) {
+		$filterCfg = $pager['pages'];
+		$limit     = isset($pager['limit']) ? intval($pager['limit']) : 100;
+		if ($type == 'list') {//全部列出模式
+			$pages = [];
+			$j     = 0;
+			$li    = count($filterCfg);
+			do {
+				$filterCfg[ $li ] = ['{$i}', $j];
+				$link             = $filter->filter($content, $filterCfg);
+				if (!$link) {
+					break;
+				}
+				$tlink[0]['url'] = $link;
+				Curlient::goodURL($url, $tlink);
+				$tu = $tlink[0]['url'];
+				if ($tu != $url && !in_array($tu, $pages)) {
+					$pages[] = $tu;
+				}
+				$j++;
+			} while ($j < $limit);
+
+			return $pages ? $pages[ $i++ ] : null;
+		} else {//下一页模式
+			$link = $filter->filter($content, $filterCfg);
+			if ($link) {//取到分页
+				$tlink[0]['url'] = $link;
+				Curlient::goodURL($url, $tlink);
+				if ($tlink[0]['url'] != $url) {
+					$link = $tlink[0]['url'];
+				} else {
+					$link = '';
+				}
+			}
+
+			return $link;
+		}
 	}
 }

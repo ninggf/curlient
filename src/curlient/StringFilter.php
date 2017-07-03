@@ -14,8 +14,10 @@ use curlient\filter\ConcatFilter;
 use curlient\filter\JsonFilter;
 use curlient\filter\NoHtmlFilter;
 use curlient\filter\NoStyleFilter;
+use curlient\filter\QueryFilter;
 use curlient\filter\ReplaceFilter;
 use curlient\filter\SubFilter;
+use curlient\filter\TagAttrFilter;
 use curlient\filter\TrimFilter;
 use curlient\filter\WrapFilter;
 
@@ -32,6 +34,8 @@ class StringFilter {
 		self::$filters['wrap']    = new WrapFilter();
 		self::$filters['trim']    = new TrimFilter();
 		self::$filters['json']    = new JsonFilter();
+		self::$filters['query']   = new QueryFilter();
+		self::$filters['attr']    = new TagAttrFilter();
 		if (function_exists('fire')) {
 			fire('string\initFilter');
 		}

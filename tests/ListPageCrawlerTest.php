@@ -81,4 +81,32 @@ class ListPageCrawlerTest extends TestCase {
 		self::assertNotEmpty($rst);
 		self::assertArrayHasKey('缩略图',$rst[0]['fields']);
 	}
+	public function testGrabDomData(){
+		$crawler = new ListCrawler();
+		$config  = [
+			'url'=>'http://www.ichong123.com/xuanchong',
+			'list'=>[//列表页取内容规则
+		         'dom'=>1,
+		         'pages' => ['ul.conlist li:nth-child({$i}) div a:first-child','href'] ,//内容页URL
+		         'fields'=>[
+			         '缩略图'=>[
+				         ['query','ul.conlist li:nth-child({$i}) a img','src']
+			         ],
+			         '描述'=>[
+				         ['query','ul.conlist li:nth-child({$i}) div p','text'],
+			             ['replace',['[详细]','......'],'']
+			         ]
+		         ],//提取字符
+		         'includes'=>[],//链接中要包含字符串
+		         'excludes'=>[]//链接中不能包含字符串
+			],
+			'conf'=>[
+				'cookie'=>[],
+				'header'=>[]
+			]];
+		$rst = $crawler->crawl($config);
+		self::assertNotEmpty($rst);
+		self::assertArrayHasKey('缩略图',$rst[0]['fields']);
+		self::assertArrayHasKey('描述',$rst[0]['fields']);
+	}
 }

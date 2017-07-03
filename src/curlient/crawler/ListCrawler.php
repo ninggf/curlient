@@ -13,7 +13,9 @@ namespace curlient\crawler;
 use curlient\Curlient;
 use curlient\filter\ConcatFilter;
 use curlient\filter\JsonFilter;
+use curlient\filter\QueryFilter;
 use curlient\StringFilter;
+use Symfony\Component\DomCrawler\Crawler;
 
 class ListCrawler {
 	private $ip;
@@ -80,6 +82,9 @@ class ListCrawler {
 			if ($content) {//解析内容
 				if ($isJson) {
 					$this->parseJsonData($content, $cfg, $pages, $gcfg, $url);
+				} else if (isset($cfg['dom'])) {
+					$content = new Crawler($content);
+					$this->parseDomData($content, $cfg, $pages, $gcfg, $url);
 				} else {
 					$this->parseTextData($content, $cfg, $pages, $gcfg, $url);
 				}
@@ -151,8 +156,52 @@ class ListCrawler {
 		$grabber   = StringFilter::getInstance();
 		$filter    = new JsonFilter();
 		do {
-			$filterCfg[] = ['{$i}', $i];
-			$link        = $filter->filter($data, $filterCfg);
+			$filterCfg[1] = ['{$i}', $i];
+			$link         = $filter->filter($data, $filterCfg);
+			if (!$link) {
+				break;
+			}
+			$links[ $i ] = $link;
+			$i++;
+		} while ($i < $limit);
+
+		if ($links) {
+			if ($cfg['fields']) {
+				foreach ($links as $i => $link) {
+					$page = ['url' => $link, 'fields' => ['URL' => $link], 'conf' => $gcfg, 'refer' => $url];
+					foreach ($cfg['fields'] as $name => $fieldCfg) {
+						if ($fieldCfg[0][0] != 'json') {
+							$page['fields'][ $name ] = '';
+						} else {
+							$li                      = count($fieldCfg[0]);
+							$fieldCfg[0][ $li ]      = ['{$i}', $i];
+							$page['fields'][ $name ] = $grabber->filter($data, $fieldCfg);
+						}
+					}
+					$pages[] = $page;
+				}
+			} else {
+				foreach ($links as $link) {
+					$page    = ['url' => $link, 'fields' => ['URL' => $link], 'conf' => $gcfg, 'refer' => $url];
+					$pages[] = $page;
+				}
+			}
+		}
+	}
+
+	private function parseDomData($data, $cfg, &$pages, $gcfg, $url) {
+		$limit = isset($gcfg['limit']) ? intval($gcfg['limit']) : 100;
+		$limit = $limit <= 0 ? 100 : $limit;
+		$limit++;
+		$links     = [];
+		$i         = 1;
+		$filterCfg = $cfg['pages'];
+		$grabber   = StringFilter::getInstance();
+		$filter    = new QueryFilter();
+		$li        = count($filterCfg);
+		do {
+			$filterCfg[ $li ] = ['{$i}', $i];
+			$link             = $filter->filter($data, $filterCfg);
 			if (!$link) {
 				break;
 			}
@@ -160,14 +209,16 @@ class ListCrawler {
 			$i++;
 		} while ($i < $limit);
 		if ($links) {
-			if ($cfg['pages']) {
+			if ($cfg['fields']) {
 				foreach ($links as $i => $link) {
 					$page = ['url' => $link, 'fields' => ['URL' => $link], 'conf' => $gcfg, 'refer' => $url];
+					//处理每一个字段
 					foreach ($cfg['fields'] as $name => $fieldCfg) {
-						if ($fieldCfg[0][0] != 'json') {
+						if ($fieldCfg[0][0] != 'query') {
 							$page['fields'][ $name ] = '';
 						} else {
-							$fieldCfg[0][]           = ['{$i}', $i];
+							$li                      = count($fieldCfg[0]);
+							$fieldCfg[0][ $li ]      = ['{$i}', $i];
 							$page['fields'][ $name ] = $grabber->filter($data, $fieldCfg);
 						}
 					}
@@ -234,7 +285,14 @@ class ListCrawler {
 	 * @return bool|string 验证成功返回true，否则返回错误信息.
 	 */
 	public static function validate($conf) {
-		return false;
+		if (!isset($conf['url'])) {
+			return _tr('url is missed@crawler');
+		}
+		if (!isset($conf['list'])) {
+			return _tr('list is missed@crawler');
+		}
+
+		return true;
 	}
 
 	/**
