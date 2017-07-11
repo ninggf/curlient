@@ -20,6 +20,7 @@ use Symfony\Component\DomCrawler\Crawler;
 
 class PageCrawler {
 	private $ip;
+	public  $error = '';
 	public  $pages = [];
 
 	public function __construct($ip = null) {
@@ -59,15 +60,7 @@ class PageCrawler {
 			$gcfg['ip']    = $this->ip;
 			$gcfg['refer'] = $refer;
 			$client        = Curlient::build($gcfg);
-
-			$content = $this->getContent($url, $client, $cfg, $gcfg);
-
-			$cookies = $client->getCookies();
-
-			if ($cookies) {
-				$gcfg['cookie'] = isset($gcfg['cookie']) && is_array($gcfg['cookie']) ? @array_merge($gcfg['cookie'], $cookies) : $cookies;
-			}
-
+			$content       = $this->getContent($url, $client, $cfg, $gcfg);
 			if ($content) {//解析内容
 				if (isset($cfg['json'])) {
 					$content = @json_decode($content);
@@ -76,7 +69,15 @@ class PageCrawler {
 				}
 				$this->parseFields($content, $cfg, $fields);
 				$this->getMoreContent($client, $content, $cfg, $fields, $url, $gcfg);
+			} else {
+				$this->error = '[' . $client->errorCode . ']' . $client->error;
+
+				return false;
 			}
+		} else {
+			$this->error = 'no fields configured';
+
+			return false;
 		}
 		$fields['抓取时间'] = time();
 		$rst            = ['url' => $url, 'fields' => $fields];

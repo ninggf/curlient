@@ -240,7 +240,6 @@ class Curlient {
 				array_walk($headers, function (&$v, $k) {
 					$v = "$k: $v";
 				});
-				print_r($headers);
 				curl_setopt($this->curl, CURLOPT_HTTPHEADER, $headers);
 			}
 			$rst = false;

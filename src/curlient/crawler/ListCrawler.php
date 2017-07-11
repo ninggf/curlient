@@ -32,11 +32,12 @@ class ListCrawler {
 	/**
 	 * 抓取一个列表页.
 	 *
-	 * @param array $config
+	 * @param array    $config
+	 * @param \Closure $filter
 	 *
 	 * @return array
 	 */
-	public function crawl($config) {
+	public function crawl($config, $filter = null) {
 		$pages = [];
 		$gcfg  = $config['conf'];
 		$cfg   = $config['list'];
@@ -97,8 +98,13 @@ class ListCrawler {
 		if ($cfg['excludes']) {
 			$pages = $this->excludes($pages, $cfg['excludes']);
 		}
+
 		if ($pages) {
 			Curlient::goodURL($url, $pages);
+		}
+
+		if ($pages && $filter) {
+			$pages = call_user_func_array($filter, [$pages]);
 		}
 
 		return $pages;
@@ -251,6 +257,10 @@ class ListCrawler {
 
 	//包含
 	private function includes($pages, $includes) {
+		if (!is_array($includes) || empty($includes)) {
+			return $pages;
+		}
+
 		return array_filter($pages, function ($page) use ($includes) {
 			foreach ($includes as $in) {
 				if (strpos($page['url'], $in) !== false) {//只要有，就要它
@@ -264,6 +274,9 @@ class ListCrawler {
 
 	//不包
 	private function excludes($pages, $excludes) {
+		if (!is_array($excludes) || empty($excludes)) {
+			return $pages;
+		}
 
 		return array_filter($pages, function ($page) use ($excludes) {
 
@@ -285,11 +298,20 @@ class ListCrawler {
 	 * @return bool|string 验证成功返回true，否则返回错误信息.
 	 */
 	public static function validate($conf) {
-		if (!isset($conf['url'])) {
+		if (!isset($conf['url']) || empty($conf['url'])) {
 			return _tr('url is missed@crawler');
 		}
-		if (!isset($conf['list'])) {
+
+		if (!isset($conf['list']) || empty($conf['list'])) {
 			return _tr('list is missed@crawler');
+		}
+
+		if (!isset($conf['list']['pages']) && !isset($conf['list']['pages1'])) {
+			return _tr('page is missed@crawler');
+		}
+
+		if (!isset($conf['conf']) || !is_array($conf['conf'])) {
+			return _tr('conf is missed or conf is not array@crawler');
 		}
 
 		return true;
