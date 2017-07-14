@@ -26,18 +26,20 @@ class StringFilter {
 	private static $INSTANCE = null;
 
 	private function __construct() {
-		self::$filters['sub']     = new SubFilter();
-		self::$filters['replace'] = new ReplaceFilter();
-		self::$filters['concat']  = new ConcatFilter();
-		self::$filters['nohtml']  = new NoHtmlFilter();
-		self::$filters['nostyle'] = new NoStyleFilter();
-		self::$filters['wrap']    = new WrapFilter();
-		self::$filters['trim']    = new TrimFilter();
-		self::$filters['json']    = new JsonFilter();
-		self::$filters['query']   = new QueryFilter();
-		self::$filters['attr']    = new TagAttrFilter();
-		if (function_exists('fire')) {
-			fire('string\initFilter');
+		if (self::$filters === null) {
+			self::$filters['sub']     = new SubFilter();
+			self::$filters['replace'] = new ReplaceFilter();
+			self::$filters['concat']  = new ConcatFilter();
+			self::$filters['nohtml']  = new NoHtmlFilter();
+			self::$filters['nostyle'] = new NoStyleFilter();
+			self::$filters['wrap']    = new WrapFilter();
+			self::$filters['trim']    = new TrimFilter();
+			self::$filters['json']    = new JsonFilter();
+			self::$filters['query']   = new QueryFilter();
+			self::$filters['attr']    = new TagAttrFilter();
+			if (function_exists('fire')) {
+				fire('string\initFilter');
+			}
 		}
 	}
 
@@ -112,5 +114,12 @@ class StringFilter {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getFilters() {
+		return self::$filters;
 	}
 }

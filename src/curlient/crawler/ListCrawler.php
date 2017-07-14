@@ -43,12 +43,7 @@ class ListCrawler {
 		$cfg   = $config['list'];
 		$url   = $config['url'];
 
-		if (isset($cfg['pages1'])) {//自定义页面
-			foreach ($cfg['pages1'] as $page) {
-				$pages[] = ['url' => $page, 'fields' => ['URL' => $pages], 'conf' => $gcfg, 'refer' => $url];
-			}
-		}
-
+		//$cfg['pages']为URL提取规则
 		if ($url && $cfg['pages']) {//可以抓取
 			$gcfg['ip'] = $this->ip;
 			$client     = Curlient::build($gcfg);
@@ -100,7 +95,7 @@ class ListCrawler {
 		}
 
 		if ($pages) {
-			Curlient::goodURL($url, $pages);
+			Curlient::goodURL($url, $pages);//完整URL
 		}
 
 		if ($pages && $filter) {
@@ -120,7 +115,10 @@ class ListCrawler {
 			$data = StringFilter::sub($data, $start, $end);
 		}
 		if ($data) {
-			$filterCfg   = $cfg['pages'];
+			$filterCfg = $cfg['pages'];
+			if (!$filterCfg) {
+				return;
+			}
 			$filterCfg[] = true;//匹配全部
 			$filter      = new ConcatFilter();
 			$links       = $filter->filter($data, $filterCfg);
@@ -145,7 +143,12 @@ class ListCrawler {
 					}
 				} else {
 					foreach ($links as $link) {//每一个页面
-						$page    = ['url' => $link[0], 'fields' => ['URL' => $link[0]], 'conf' => $gcfg, 'refer' => $url];
+						$page    = [
+							'url'    => $link[0],
+							'fields' => ['URL' => $link[0]],
+							'conf'   => $gcfg,
+							'refer'  => $url
+						];
 						$pages[] = $page;
 					}
 				}
@@ -159,18 +162,19 @@ class ListCrawler {
 		$links     = [];
 		$i         = 0;
 		$filterCfg = $cfg['pages'];
-		$grabber   = StringFilter::getInstance();
-		$filter    = new JsonFilter();
-		do {
-			$filterCfg[1] = ['{$i}', $i];
-			$link         = $filter->filter($data, $filterCfg);
-			if (!$link) {
-				break;
-			}
-			$links[ $i ] = $link;
-			$i++;
-		} while ($i < $limit);
-
+		if ($filterCfg) {
+			$grabber = StringFilter::getInstance();
+			$filter  = new JsonFilter();
+			do {
+				$filterCfg[1] = ['{$i}', $i];
+				$link         = $filter->filter($data, $filterCfg);
+				if (!$link) {
+					break;
+				}
+				$links[ $i ] = $link;
+				$i++;
+			} while ($i < $limit);
+		}
 		if ($links) {
 			if ($cfg['fields']) {
 				foreach ($links as $i => $link) {
@@ -202,18 +206,20 @@ class ListCrawler {
 		$links     = [];
 		$i         = 1;
 		$filterCfg = $cfg['pages'];
-		$grabber   = StringFilter::getInstance();
-		$filter    = new QueryFilter();
-		$li        = count($filterCfg);
-		do {
-			$filterCfg[ $li ] = ['{$i}', $i];
-			$link             = $filter->filter($data, $filterCfg);
-			if (!$link) {
-				break;
-			}
-			$links[ $i ] = $link;
-			$i++;
-		} while ($i < $limit);
+		if ($filterCfg) {
+			$grabber = StringFilter::getInstance();
+			$filter  = new QueryFilter();
+			$li      = count($filterCfg);
+			do {
+				$filterCfg[ $li ] = ['{$i}', $i];
+				$link             = $filter->filter($data, $filterCfg);
+				if (!$link) {
+					break;
+				}
+				$links[ $i ] = $link;
+				$i++;
+			} while ($i < $limit);
+		}
 		if ($links) {
 			if ($cfg['fields']) {
 				foreach ($links as $i => $link) {
