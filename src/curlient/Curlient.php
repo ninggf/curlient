@@ -28,9 +28,23 @@ namespace curlient;
 class Curlient {
 	protected static $cookies = [];
 	//随机Agent
-	protected static $agents = ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.109 Safari/537.36', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:54.0) Gecko/20100101 Firefox/54.0', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:30.0) Gecko/20100101 Firefox/54.0', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Gecko/20100101 Firefox/54.0', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.109 Safari/537.36'];
+	protected static $agents = [
+		'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.109 Safari/537.36',
+		'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:54.0) Gecko/20100101 Firefox/54.0',
+		'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:30.0) Gecko/20100101 Firefox/54.0',
+		'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Gecko/20100101 Firefox/54.0',
+		'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.109 Safari/537.36'
+	];
 	//默认请求头
-	protected static $headers = ['Accept' => '*/*', 'Accept-Language' => 'zh-CN,en;q=0.8,zh;q=0.6', 'Cache-Control' => 'no-cache', 'Accept-Encoding' => 'gzip, deflate', 'DNT' => '1', 'Pragma' => 'no-cache', 'Connection' => 'keep-alive'];
+	protected static $headers = [
+		'Accept'          => '*/*',
+		'Accept-Language' => 'zh-CN,en;q=0.8,zh;q=0.6',
+		'Cache-Control'   => 'no-cache',
+		'Accept-Encoding' => 'gzip, deflate',
+		'DNT'             => '1',
+		'Pragma'          => 'no-cache',
+		'Connection'      => 'keep-alive'
+	];
 
 	public $error     = '';
 	public $errorCode = 0;
@@ -238,7 +252,9 @@ class Curlient {
 			if ($this->header) {
 				$headers = $this->header;
 				array_walk($headers, function (&$v, $k) {
-					$v = "$k: $v";
+					if (!is_numeric($k)) {
+						$v = "$k: $v";
+					}
 				});
 				curl_setopt($this->curl, CURLOPT_HTTPHEADER, $headers);
 			}
@@ -657,6 +673,7 @@ class Curlient {
 			return '';
 		}
 		$tmp_ary = array();
+
 		foreach ($ary as $name => $val) {
 			$name       = trim($name);
 			$tmp_ary [] = $name . '=' . $val;

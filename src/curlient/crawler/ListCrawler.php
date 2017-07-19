@@ -111,7 +111,7 @@ class ListCrawler {
 			$grabber = StringFilter::getInstance();
 		}
 		if (isset($cfg['wrapper'])) {
-			list($start, $end) = $cfg['wrapper'];
+			@list($start, $end) = $cfg['wrapper'];
 			$data = StringFilter::sub($data, $start, $end);
 		}
 		if ($data) {
@@ -343,7 +343,9 @@ class ListCrawler {
 			if (preg_match('#\{\{\s*0\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(0|[1-9]\d*)\s*\}\}#', $expression, $tags)) {
 				@list($all, $start, $end, $step, $pad) = $tags;
 				$pad  = intval($pad);
-				$nums = range(intval($start), intval($end), intval($step));
+				$step = intval($step);
+				$step = $step === 0 ? 1 : $step;
+				$nums = @range(intval($start), intval($end), $step);
 				foreach ($nums as $num) {
 					if ($pad > 1) {
 						$num = str_pad($num, $pad, '0', STR_PAD_LEFT);
