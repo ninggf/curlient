@@ -81,6 +81,8 @@ class QueryFilter implements IFieldFilter {
 						$rtn = $dom->attr($attr);
 				}
 			}
+		} else {
+			$rtn = '';
 		}
 
 		return $rtn;

@@ -333,8 +333,14 @@ class ListCrawler {
 	public static function parseListPageURL($config) {
 		$lists = [];
 		// 一个元素即为一个url.
-		if (isset($config['entries'])) {
-			$lists += $config['entries'];
+		if (isset($config['entries']) && $config['entries']) {
+			$es = $config['entries'];
+			if (is_array($es)) {
+				$lists += $es;
+			} else {
+				$ess   = explode("\n", trim($es));
+				$lists += $ess;
+			}
 		}
 
 		if (isset($config['expression'])) {
@@ -355,6 +361,6 @@ class ListCrawler {
 			}
 		}
 
-		return $lists;
+		return array_unique($lists);
 	}
 }

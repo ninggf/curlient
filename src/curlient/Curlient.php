@@ -513,7 +513,7 @@ class Curlient {
 		$base = $info['scheme'] . '://' . $auth . $info['host'] . (isset($info['port']) ? ':' . $info['port'] : '');
 		$path = $base . $path;
 		array_walk($urls, function (&$url) use ($info, $base, $path) {
-			$url['url'] = trim($url['url']);
+			$url['url'] = @trim($url['url']);
 			if (preg_match('#^(?P<lt>(ht|f)tps?://|//|/)?.*#i', $url['url'], $ms)) {
 				if (isset($ms['lt'])) {
 					switch ($ms['lt']) {
@@ -672,7 +672,7 @@ class Curlient {
 		if (empty ($ary)) {
 			return '';
 		}
-		$tmp_ary = array();
+		$tmp_ary = [];
 
 		foreach ($ary as $name => $val) {
 			$name       = trim($name);

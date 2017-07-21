@@ -68,7 +68,9 @@ class PageCrawler {
 					$content = new Crawler($content);
 				}
 				$this->parseFields($content, $cfg, $fields);
-				$this->getMoreContent($client, $content, $cfg, $fields, $url, $gcfg);
+				if (isset($cfg['pager']['type']) && $cfg['pager']['pages'][0]) {
+					$this->getMoreContent($client, $content, $cfg, $fields, $url, $gcfg);
+				}
 			} else {
 				$this->error = '[' . $client->errorCode . ']' . $client->error;
 
