@@ -172,9 +172,9 @@ class ListCrawler {
 		$links     = [];
 		$i         = 0;
 		$filterCfg = $cfg['pages'];
+		$grabber   = StringFilter::getInstance();
 		if ($filterCfg) {
-			$grabber = StringFilter::getInstance();
-			$filter  = new JsonFilter();
+			$filter = new JsonFilter();
 			do {
 				$filterCfg[1] = ['{$i}', $i];
 				$link         = $filter->filter($data, $filterCfg);
@@ -216,10 +216,10 @@ class ListCrawler {
 		$links     = [];
 		$i         = 1;
 		$filterCfg = $cfg['pages'];
+		$grabber   = StringFilter::getInstance();
 		if ($filterCfg) {
-			$grabber = StringFilter::getInstance();
-			$filter  = new QueryFilter();
-			$li      = count($filterCfg);
+			$filter = new QueryFilter();
+			$li     = count($filterCfg);
 			do {
 				$filterCfg[ $li ] = ['{$i}', $i];
 				$link             = $filter->filter($data, $filterCfg);
