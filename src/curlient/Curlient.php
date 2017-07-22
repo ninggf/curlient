@@ -629,9 +629,9 @@ class Curlient {
 		curl_setopt($this->curl, CURLOPT_HEADER, false);
 		curl_setopt($this->curl, CURLOPT_SAFE_UPLOAD, true);
 
-		if (version_compare(phpversion(), '7.0.6', '>')) {
-			curl_setopt($this->curl, CURLOPT_TCP_FASTOPEN, true);
-		}
+		//		if (version_compare(phpversion(), '7.0.6', '>')) {
+		//			curl_setopt($this->curl, CURLOPT_TCP_FASTOPEN, true);
+		//		}
 
 		if ($this->proxy) {
 			curl_setopt($this->curl, CURLOPT_PROXY, $this->proxy);
