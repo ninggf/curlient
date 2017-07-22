@@ -122,10 +122,16 @@ class ListCrawler {
 			$filterCfg[] = true;//匹配全部
 			$filter      = new ConcatFilter();
 			$links       = $filter->filter($data, $filterCfg);
+			$limit       = isset($cfg['limit']) ? intval($cfg['limit']) : 100;
+			$limit       = $limit <= 0 ? 100 : $limit;
+			$i           = 0;
 			if ($links) {
 				if ($cfg['fields']) {
 					$preLink = '';//前一个匹配链接全字符，用于定位后一个链接.
 					foreach ($links as $link) {
+						if ($i++ > $limit) {
+							break;
+						}
 						$page = ['url' => $link[0], 'fields' => ['URL' => $link[0]], 'conf' => $gcfg, 'refer' => $url];
 						foreach ($cfg['fields'] as $name => $fieldCfg) {
 							$name = explode('.', $name);
@@ -137,12 +143,16 @@ class ListCrawler {
 								$fdata = StringFilter::sub($data, $preLink, $link[1]);
 							}
 							$page['fields'][ $name ] = $grabber->filter($fdata, $fieldCfg);
+							unset($fdata);
 						}
 						$preLink = $link[1];
 						$pages[] = $page;
 					}
 				} else {
 					foreach ($links as $link) {//每一个页面
+						if ($i++ > $limit) {
+							break;
+						}
 						$page    = [
 							'url'    => $link[0],
 							'fields' => ['URL' => $link[0]],
@@ -157,7 +167,7 @@ class ListCrawler {
 	}
 
 	private function parseJsonData($data, $cfg, &$pages, $gcfg, $url) {
-		$limit     = isset($gcfg['limit']) ? intval($gcfg['limit']) : 100;
+		$limit     = isset($cfg['limit']) ? intval($cfg['limit']) : 100;
 		$limit     = $limit <= 0 ? 100 : $limit;
 		$links     = [];
 		$i         = 0;
@@ -200,7 +210,7 @@ class ListCrawler {
 	}
 
 	private function parseDomData($data, $cfg, &$pages, $gcfg, $url) {
-		$limit = isset($gcfg['limit']) ? intval($gcfg['limit']) : 100;
+		$limit = isset($cfg['limit']) ? intval($cfg['limit']) : 100;
 		$limit = $limit <= 0 ? 100 : $limit;
 		$limit++;
 		$links     = [];
