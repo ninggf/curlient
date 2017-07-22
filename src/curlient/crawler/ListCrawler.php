@@ -124,18 +124,20 @@ class ListCrawler {
 			$links       = $filter->filter($data, $filterCfg);
 			$limit       = isset($cfg['limit']) ? intval($cfg['limit']) : 100;
 			$limit       = $limit <= 0 ? 100 : $limit;
+			$spos        = isset($cfg['start']) ? $cfg['start'] : 0;
 			$i           = 0;
 			if ($links) {
 				if ($cfg['fields']) {
 					$preLink = '';//前一个匹配链接全字符，用于定位后一个链接.
 					foreach ($links as $link) {
-						if ($i++ > $limit) {
+						$i++;
+						if ($i > $limit || $i < $spos) {
 							break;
 						}
 						$page = ['url' => $link[0], 'fields' => ['URL' => $link[0]], 'conf' => $gcfg, 'refer' => $url];
 						foreach ($cfg['fields'] as $name => $fieldCfg) {
 							$name = explode('.', $name);
-							$pos  = isset($name[1]) ? $name[1] : 'after';
+							$pos  = isset($name[1]) ? $name[1] : 'before';
 							$name = $name[0];
 							if ($pos == 'after') {
 								$fdata = StringFilter::sub($data, $link[1]);
@@ -150,7 +152,8 @@ class ListCrawler {
 					}
 				} else {
 					foreach ($links as $link) {//每一个页面
-						if ($i++ > $limit) {
+						$i++;
+						if ($i > $limit || $i < $spos) {
 							break;
 						}
 						$page    = [
@@ -173,12 +176,17 @@ class ListCrawler {
 		}
 		$limit     = isset($cfg['limit']) ? intval($cfg['limit']) : 100;
 		$limit     = $limit <= 0 ? 100 : $limit;
+		$spos      = isset($cfg['start']) ? $cfg['start'] : 0;
 		$links     = [];
 		$i         = 0;
 		$filterCfg = $cfg['pages'];
 		if ($filterCfg) {
 			$filter = new JsonFilter();
 			do {
+				if ($i < $spos) {
+					$i++;
+					continue;
+				}
 				$filterCfg[1] = ['{$i}', $i];
 				$link         = $filter->filter($data, $filterCfg);
 				if (!$link) {
@@ -217,17 +225,21 @@ class ListCrawler {
 		if ($grabber === false) {
 			$grabber = StringFilter::getInstance();
 		}
-		$limit = isset($cfg['limit']) ? intval($cfg['limit']) : 100;
-		$limit = $limit <= 0 ? 100 : $limit;
-		$limit++;
+		$limit     = isset($cfg['limit']) ? intval($cfg['limit']) : 100;
+		$limit     = $limit <= 0 ? 100 : $limit;
+		$spos      = isset($cfg['start']) ? $cfg['start'] : 0;
 		$links     = [];
-		$i         = 1;
+		$i         = 0;
 		$filterCfg = $cfg['pages'];
 		if ($filterCfg) {
 			$filter = new QueryFilter();
 			$li     = count($filterCfg);
 			do {
-				$filterCfg[ $li ] = ['{$i}', $i];
+				if ($i < $spos) {
+					$i++;
+					continue;
+				}
+				$filterCfg[ $li ] = ['{$i}', $i + 1];
 				$link             = $filter->filter($data, $filterCfg);
 				if (!$link) {
 					break;

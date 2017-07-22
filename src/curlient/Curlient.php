@@ -217,6 +217,7 @@ class Curlient {
 			}
 			if ($encoding && $encoding != 'UTF-8') {
 				$rst = @mb_convert_encoding($rst, 'UTF-8', $encoding);
+				$rst = preg_replace('/charset=([\'"])?(.+?)((;.+)?[\'"])/', 'charset=\1UTF-8\3', $rst);
 			}
 
 			return $rst;

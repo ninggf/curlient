@@ -19,7 +19,6 @@ class QueryFilter implements IFieldFilter {
 	}
 
 	public function filter($content, $args) {
-		$rtn = $content;
 		@list($selector, $attr, $sr) = $args;
 
 		if ($selector) {

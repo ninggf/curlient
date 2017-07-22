@@ -24,10 +24,17 @@ class SubFilter implements IFieldFilter {
 	public function filter($content, $args) {
 		if (!empty($content)) {
 			@list($start, $end) = $args;
-			$startPos = $start ? mb_strpos($content, $start) + mb_strlen($start) : 0;
+			$startPos = $start ? mb_strpos($content, $start) : 0;
 			$endPos   = $end ? mb_strpos($content, $end, $startPos) : null;
-			$len      = $endPos ? $endPos - $startPos : null;
-			$content  = mb_substr($content, $startPos, $len);
+			if ($startPos || $endPos) {
+				$startPos += mb_strlen($start);
+			}
+			$len = $endPos ? $endPos - $startPos : null;
+			if ($startPos && $endPos) {
+				$content = mb_substr($content, $startPos, $len);
+			} else {
+				$content = '';
+			}
 		}
 
 		return $content;

@@ -25,11 +25,15 @@ class NoHtmlFilter implements IFieldFilter {
 				if ($tags) {
 					return preg_replace('#</?' . $tags . '[^>]*>#iums', '', $content);
 				}
+
+				return $content;
 			} else {
 				$tags = str_replace(',', '|', $args);
 				if ($tags) {
 					return preg_replace('#<(' . $tags . ')[^>]*>.*?</\1>#iums', '', $content);
 				}
+
+				return $content;
 			}
 		}
 
