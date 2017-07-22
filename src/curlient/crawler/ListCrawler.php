@@ -167,12 +167,15 @@ class ListCrawler {
 	}
 
 	private function parseJsonData($data, $cfg, &$pages, $gcfg, $url) {
+		static $grabber = false;
+		if ($grabber === false) {
+			$grabber = StringFilter::getInstance();
+		}
 		$limit     = isset($cfg['limit']) ? intval($cfg['limit']) : 100;
 		$limit     = $limit <= 0 ? 100 : $limit;
 		$links     = [];
 		$i         = 0;
 		$filterCfg = $cfg['pages'];
-		$grabber   = StringFilter::getInstance();
 		if ($filterCfg) {
 			$filter = new JsonFilter();
 			do {
@@ -210,13 +213,16 @@ class ListCrawler {
 	}
 
 	private function parseDomData($data, $cfg, &$pages, $gcfg, $url) {
+		static $grabber = false;
+		if ($grabber === false) {
+			$grabber = StringFilter::getInstance();
+		}
 		$limit = isset($cfg['limit']) ? intval($cfg['limit']) : 100;
 		$limit = $limit <= 0 ? 100 : $limit;
 		$limit++;
 		$links     = [];
 		$i         = 1;
 		$filterCfg = $cfg['pages'];
-		$grabber   = StringFilter::getInstance();
 		if ($filterCfg) {
 			$filter = new QueryFilter();
 			$li     = count($filterCfg);
