@@ -13,9 +13,6 @@ namespace curlient\filter;
 use curlient\IFieldFilter;
 
 class SubFilter implements IFieldFilter {
-	function id() {
-		return 'sub';
-	}
 
 	function name() {
 		return _t('Sub@crawler');

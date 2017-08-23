@@ -16,6 +16,7 @@ use curlient\filter\NoHtmlFilter;
 use curlient\filter\NoStyleFilter;
 use curlient\filter\QueryFilter;
 use curlient\filter\ReplaceFilter;
+use curlient\filter\StrToTimeFilter;
 use curlient\filter\SubFilter;
 use curlient\filter\TagAttrFilter;
 use curlient\filter\TrimFilter;
@@ -27,16 +28,17 @@ class StringFilter {
 
 	private function __construct() {
 		if (self::$filters === null) {
-			self::$filters['sub']     = new SubFilter();
-			self::$filters['replace'] = new ReplaceFilter();
-			self::$filters['concat']  = new ConcatFilter();
-			self::$filters['nohtml']  = new NoHtmlFilter();
-			self::$filters['nostyle'] = new NoStyleFilter();
-			self::$filters['wrap']    = new WrapFilter();
-			self::$filters['trim']    = new TrimFilter();
-			self::$filters['json']    = new JsonFilter();
-			self::$filters['query']   = new QueryFilter();
-			self::$filters['attr']    = new TagAttrFilter();
+			self::$filters['sub']       = new SubFilter();
+			self::$filters['replace']   = new ReplaceFilter();
+			self::$filters['concat']    = new ConcatFilter();
+			self::$filters['nohtml']    = new NoHtmlFilter();
+			self::$filters['nostyle']   = new NoStyleFilter();
+			self::$filters['wrap']      = new WrapFilter();
+			self::$filters['trim']      = new TrimFilter();
+			self::$filters['json']      = new JsonFilter();
+			self::$filters['query']     = new QueryFilter();
+			self::$filters['attr']      = new TagAttrFilter();
+			self::$filters['strtotime'] = new StrToTimeFilter();
 			if (function_exists('fire')) {
 				fire('string\initFilter');
 			}
