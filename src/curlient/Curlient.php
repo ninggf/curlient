@@ -56,7 +56,7 @@ class Curlient {
 	protected $url          = '';
 	protected $agent        = '';
 	protected $host         = '';
-	protected $encoding     = '';
+	protected $encoding     = 'UTF-8';
 	protected $content      = '';
 	protected $options      = [];
 	protected $cookie       = [];
@@ -64,18 +64,26 @@ class Curlient {
 	protected $isSubRequest = false;//批量请求中的一个子请求.
 	private   $ready        = false;//是否可以调用.
 
-	public function __construct($timeout = 30, $proxy = '') {
+	public function __construct($timeout = 30, $proxy = '', $parseHeader = true) {
 		$this->timeout = intval($timeout) ? intval($timeout) : 30;
 		set_time_limit($this->timeout + 60);
 		$this->proxy = $proxy;
 		$this->agent = self::$agents[ array_rand(self::$agents) ];
-		$this->initCurl();
+		$this->initCurl($parseHeader);
 	}
 
-	// 关闭curl资源.
 	public function __destruct() {
+		$this->close();
+	}
+
+	/**
+	 * 关闭curl资源.
+	 */
+	public function close() {
 		if ($this->curl) {
 			@curl_close($this->curl);
+			unset($this->curl);
+			$this->curl = null;
 		}
 	}
 
@@ -610,12 +618,11 @@ class Curlient {
 
 	/**
 	 * 初始化curl.
-	 * @throws \Exception when curl_init returns false.
 	 */
-	private function initCurl() {
+	private function initCurl($parseHeader) {
 		$this->curl = @curl_init();
 		if (!$this->curl) {
-			throw_exception('Cannot initialize curl.');
+			return;
 		}
 
 		curl_setopt($this->curl, CURLOPT_AUTOREFERER, true);
@@ -630,10 +637,6 @@ class Curlient {
 		curl_setopt($this->curl, CURLOPT_HEADER, false);
 		curl_setopt($this->curl, CURLOPT_SAFE_UPLOAD, true);
 
-		//		if (version_compare(phpversion(), '7.0.6', '>')) {
-		//			curl_setopt($this->curl, CURLOPT_TCP_FASTOPEN, true);
-		//		}
-
 		if ($this->proxy) {
 			curl_setopt($this->curl, CURLOPT_PROXY, $this->proxy);
 		}
@@ -641,8 +644,9 @@ class Curlient {
 		curl_setopt($this->curl, CURLOPT_CONNECTTIMEOUT, 15);
 
 		curl_setopt($this->curl, CURLOPT_TIMEOUT, $this->timeout);
-
-		curl_setopt($this->curl, CURLOPT_HEADERFUNCTION, [$this, 'parseHeaders']);
+		if ($parseHeader) {
+			curl_setopt($this->curl, CURLOPT_HEADERFUNCTION, [$this, 'parseHeaders']);
+		}
 	}
 
 	/**
