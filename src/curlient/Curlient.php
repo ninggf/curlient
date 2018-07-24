@@ -420,6 +420,29 @@ class Curlient {
 	}
 
 	/**
+	 * GET
+	 *
+	 * @param string $url
+	 *
+	 * @return \curlient\Curlient
+	 */
+	public function get($url) {
+		return $this->request($url, 'get');
+	}
+
+	/**
+	 * POST
+	 *
+	 * @param string $url
+	 * @param array  $data
+	 *
+	 * @return \curlient\Curlient
+	 */
+	public function post($url, $data = []) {
+		return $this->request($url, 'post', $data);
+	}
+
+	/**
 	 * 批量请求.
 	 *
 	 * @param array               $urls      请求URL数组.
