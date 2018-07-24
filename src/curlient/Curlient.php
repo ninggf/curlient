@@ -24,6 +24,8 @@ namespace curlient;
  * @property array    $options     curl选项.
  * @property array    $cookie      用户自定义cookie
  * @property array    $header      用户定义header
+ * @property int      $timeout     超时
+ * @property bool     $parseHeader 是否解析头信息
  */
 class Curlient {
 	protected static $cookies = [];
@@ -64,7 +66,7 @@ class Curlient {
 	protected $isSubRequest = false;//批量请求中的一个子请求.
 	private   $ready        = false;//是否可以调用.
 
-	public function __construct($timeout = 30, $proxy = '', $parseHeader = true) {
+	public function __construct($timeout = 30, $proxy = '', $parseHeader = false) {
 		$this->timeout = intval($timeout) ? intval($timeout) : 30;
 		set_time_limit($this->timeout + 60);
 		$this->proxy = $proxy;
@@ -74,6 +76,14 @@ class Curlient {
 
 	public function __destruct() {
 		$this->close();
+	}
+
+	/**
+	 * 默认实例.
+	 * @return \curlient\Curlient
+	 */
+	public static function factory() {
+		return new Curlient();
 	}
 
 	/**
@@ -159,8 +169,15 @@ class Curlient {
 		return $this;
 	}
 
+	/**
+	 * @param $referer
+	 *
+	 * @return \curlient\Curlient
+	 */
 	public function referer($referer) {
 		$this->referer = $referer;
+
+		return $this;
 	}
 
 	/**
@@ -316,6 +333,33 @@ class Curlient {
 		return null;
 	}
 
+	public function __set($name, $value) {
+		if ($name == 'timeout' && $this->curl) {
+			$this->timeout = intval($value);
+			curl_setopt($this->curl, CURLOPT_TIMEOUT, $this->timeout);
+		} else if ($name == 'parseHeader' && $this->curl) {
+			if ($value) {
+				curl_setopt($this->curl, CURLOPT_HEADERFUNCTION, [$this, 'parseHeaders']);
+			} else {
+				curl_setopt($this->curl, CURLOPT_HEADERFUNCTION, null);
+			}
+		} else if ($name == 'proxy' && $this->curl) {
+			$this->proxy = $value;
+			curl_setopt($this->curl, CURLOPT_PROXY, $this->proxy);
+		} else if ($name == 'encoding') {
+			$this->encoding = $value;
+		} else if ($name == 'agent') {
+			$this->agent = $value;
+			curl_setopt($this->curl, CURLOPT_USERAGENT, $this->agent);
+		} else if ($name == 'referer') {
+			$this->referer = $value;
+		} else if ($name == 'header') {
+			$this->header = $value;
+		} else if ($name == 'cookie') {
+			$this->header = $value;
+		}
+	}
+
 	/**
 	 * 请求.
 	 *
@@ -358,10 +402,10 @@ class Curlient {
 		//设置请求方法
 		if ($method == 'get') {
 			curl_setopt($this->curl, CURLOPT_HTTPGET, 1);
-			curl_setopt($this->curl, CURLOPT_PORT, 0);
+			curl_setopt($this->curl, CURLOPT_POST, 0);
 		} else {
 			curl_setopt($this->curl, CURLOPT_HTTPGET, 0);
-			curl_setopt($this->curl, CURLOPT_PORT, 1);
+			curl_setopt($this->curl, CURLOPT_POST, 1);
 			//提交字段
 			if ($postFields) {
 				curl_setopt($this->curl, CURLOPT_POSTFIELDS, $postFields);
@@ -618,6 +662,8 @@ class Curlient {
 
 	/**
 	 * 初始化curl.
+	 *
+	 * @param $parseHeader
 	 */
 	private function initCurl($parseHeader) {
 		$this->curl = @curl_init();
